@@ -26,20 +26,8 @@ jobs:
           pip install -r requirements.txt pyinstaller
 
       - name: Build single-file EXE with PyInstaller
-        run: |
-          pyinstaller ^
-            --name "YouTubeDownloader" ^
-            --onefile ^
-            --windowed ^
-            --noconfirm ^
-            --add-data "static;static" ^
-            --collect-all imageio_ffmpeg ^
-            --collect-submodules yt_dlp ^
-            --hidden-import uvicorn.logging ^
-            --hidden-import uvicorn.loops.auto ^
-            --hidden-import uvicorn.protocols.http.auto ^
-            --hidden-import uvicorn.lifespan.on ^
-            run.py
+        shell: cmd
+        run: pyinstaller --name "YouTubeDownloader" --onefile --windowed --noconfirm --add-data "static;static" --collect-all imageio_ffmpeg --collect-submodules yt_dlp --hidden-import uvicorn.logging --hidden-import uvicorn.loops.auto --hidden-import uvicorn.protocols.http.auto --hidden-import uvicorn.lifespan.on run.py
 
       - name: Upload YouTubeDownloader.exe
         uses: actions/upload-artifact@v4
