@@ -1,0 +1,164 @@
+<!DOCTYPE html>
+<html lang="zh-Hant">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>YouTube 影片下載器</title>
+  <link rel="stylesheet" href="/static/style.css" />
+</head>
+<body>
+  <div class="container">
+    <header class="header">
+      <div>
+        <h1>YouTube 下載器</h1>
+        <p class="subtitle">支援 4K/1080p 影片、純音訊轉檔、繁中字幕與播放清單批次下載</p>
+      </div>
+      <div id="envBadge" class="badge badge-muted">檢查環境中...</div>
+    </header>
+
+    <section class="card">
+      <div class="url-row">
+        <input
+          id="urlInput"
+          type="url"
+          placeholder="貼上 YouTube 影片或播放清單網址，例如 https://www.youtube.com/watch?v=..."
+          autocomplete="off"
+        />
+        <button id="inspectBtn" class="btn btn-secondary" type="button">解析預覽</button>
+        <button id="downloadBtn" class="btn btn-primary" type="button">開始下載</button>
+      </div>
+      <p id="inspectError" class="error-text hidden"></p>
+
+      <div id="previewBox" class="preview-box hidden">
+        <img id="previewThumb" class="preview-thumb" alt="影片縮圖" />
+        <div class="preview-meta">
+          <div class="preview-badges">
+            <span id="previewTypeBadge" class="badge badge-accent">單支影片</span>
+            <span id="previewDuration" class="meta-chip"></span>
+          </div>
+          <h2 id="previewTitle"></h2>
+          <p id="previewUploader" class="muted"></p>
+          <div id="previewPlaylistList" class="playlist-preview hidden"></div>
+        </div>
+      </div>
+    </section>
+
+    <section class="card">
+      <h3 class="section-title">下載設定</h3>
+      <div class="options-grid">
+        <div class="field">
+          <label for="modeSelect">下載模式</label>
+          <select id="modeSelect">
+            <option value="video" selected>影片含音訊</option>
+            <option value="audio">純音訊轉檔</option>
+          </select>
+        </div>
+
+        <div class="field video-only">
+          <label for="qualitySelect">最高畫質上限</label>
+          <select id="qualitySelect">
+            <option value="best" selected>最高畫質 (不限)</option>
+            <option value="2160">4K (2160p)</option>
+            <option value="1440">2K (1440p)</option>
+            <option value="1080">Full HD (1080p)</option>
+            <option value="720">HD (720p)</option>
+            <option value="480">SD (480p)</option>
+            <option value="360">360p</option>
+          </select>
+        </div>
+
+        <div class="field video-only">
+          <label for="codecSelect">編碼與封裝偏好</label>
+          <select id="codecSelect">
+            <option value="compat" selected>相容性優先 (MP4: H.264 + AAC)</option>
+            <option value="quality">極致畫質優先 (VP9 / AV1)</option>
+          </select>
+        </div>
+
+        <div class="field audio-only hidden">
+          <label for="audioFormatSelect">音訊格式</label>
+          <select id="audioFormatSelect">
+            <option value="mp3" selected>MP3</option>
+            <option value="m4a">M4A (AAC)</option>
+            <option value="opus">OPUS</option>
+            <option value="flac">FLAC (無損封裝)</option>
+          </select>
+        </div>
+
+        <div class="field audio-only hidden">
+          <label for="audioQualitySelect">音訊位元率</label>
+          <select id="audioQualitySelect">
+            <option value="320">320 kbps</option>
+            <option value="192" selected>192 kbps</option>
+            <option value="128">128 kbps</option>
+          </select>
+        </div>
+
+        <div class="field">
+          <label for="playlistModeSelect">播放清單處理</label>
+          <select id="playlistModeSelect">
+            <option value="single" selected>僅下載目前影片</option>
+            <option value="playlist">下載整個播放清單</option>
+          </select>
+        </div>
+
+        <div class="field playlist-only hidden">
+          <label for="playlistItemsInput">清單項目範圍 (選填)</label>
+          <input id="playlistItemsInput" type="text" placeholder="例如：1-5 或 1,3,5" />
+        </div>
+
+        <div class="field">
+          <label for="cookiesSelect">瀏覽器 Cookie (防驗證失敗)</label>
+          <select id="cookiesSelect">
+            <option value="none" selected>不使用</option>
+            <option value="chrome">Google Chrome</option>
+            <option value="safari">Safari</option>
+            <option value="firefox">Firefox</option>
+            <option value="edge">Microsoft Edge</option>
+            <option value="brave">Brave</option>
+          </select>
+        </div>
+
+        <div class="field field-wide">
+          <label for="outputDirInput">本機儲存資料夾</label>
+          <input id="outputDirInput" type="text" placeholder="預設儲存於專案 downloads/ 目錄" />
+        </div>
+      </div>
+
+      <div class="subtitles-panel">
+        <label class="checkbox-label">
+          <input id="subtitlesCheck" type="checkbox" />
+          <span>下載字幕</span>
+        </label>
+
+        <div id="subtitlesOptions" class="subtitles-options hidden">
+          <div class="field">
+            <label for="subtitleLangsInput">字幕語言代碼 (逗號分隔)</label>
+            <input id="subtitleLangsInput" type="text" value="zh-TW,zh-Hant,en" />
+          </div>
+          <label class="checkbox-label">
+            <input id="autoSubsCheck" type="checkbox" checked />
+            <span>包含自動生成字幕</span>
+          </label>
+          <label class="checkbox-label video-only">
+            <input id="embedSubsCheck" type="checkbox" />
+            <span>將字幕內嵌進影片</span>
+          </label>
+        </div>
+      </div>
+    </section>
+
+    <section class="card">
+      <div class="jobs-header">
+        <h3 class="section-title">下載任務</h3>
+        <span id="jobCountBadge" class="badge badge-muted">0 個任務</span>
+      </div>
+      <div id="jobsList" class="jobs-list">
+        <p class="empty-state">尚未建立下載任務，貼上網址並點擊「開始下載」。</p>
+      </div>
+    </section>
+  </div>
+
+  <script src="/static/app.js"></script>
+</body>
+</html>

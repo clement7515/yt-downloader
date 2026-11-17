@@ -1,0 +1,10 @@
+.venv/
+.pyinstaller_cache/
+build/
+dist/
+downloads/
+__pycache__/
+*.pyc
+*.spec
+*.zip
+.DS_Store
